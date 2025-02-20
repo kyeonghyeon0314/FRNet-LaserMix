@@ -1,3 +1,8 @@
+# 참고 모델
+- [LaserMix](https://github.com/ldkong1205/LaserMix)
+- [FRNet](https://github.com/Xiangxu-0103/FRNet)
+
+
 # 추가해야할 사항들 
 - 데이터셋에 맞는 data_root 조정
 - mmdetection3d 설치
@@ -10,3 +15,5 @@ mmdetection3d 내에서 LaserMix 위치는 mmdetection3d/mmdet3d/datasets/transf
 
 ## 추후 해야할 일
 semantickitti_infos_train.10.pkl 에 대해서 알아볼 필요가 있음
+
+

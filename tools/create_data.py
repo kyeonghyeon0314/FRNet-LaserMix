@@ -106,7 +106,6 @@ def create_semantickitti_info_file(pkl_prefix: str, save_path: str) -> None:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Data converter arg parser')
-    parser.add_argument('dataset', metavar='kitti', help='name of the dataset')
     parser.add_argument(
         '--root-path',
         type=str,
