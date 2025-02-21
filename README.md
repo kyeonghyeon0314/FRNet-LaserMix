@@ -42,5 +42,5 @@
 ```
 python tools/create_data.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py
 ```
-우선 서버에 학습을 실행중이다. 성능 검증은 추후 학습이 완료되면 해볼 예정
-
+우선 서버에 학습 실행중, 성능 검증은 추후 학습이 완료되면 해볼 예정
+10% 라벨 반지도 학습으로
