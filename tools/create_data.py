@@ -32,9 +32,10 @@ total_num = {
 fold_split = {
     'train': [0, 1, 2, 3, 4, 5, 6, 7, 9, 10],
     'val': [8],
+    'trainval': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     'test': [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
 }
-split_list = ['train', 'valid', 'test']
+split_list = ['train', 'valid', 'trainval', 'test']
 
 def get_semantickitti_info(split):
     """Create info file in the form of
@@ -54,10 +55,10 @@ def get_semantickitti_info(split):
         }
     """
     data_infos = dict()
-    data_infos['metainfo'] = dict(DATASET='SemanticKITTI')     # 데이터셋 이름 대문자로 적용중 
+    data_infos['metainfo'] = dict(dataset='SemanticKITTI')     # 데이터셋 이름 대문자로 적용중 
     data_list = []
     for i_folder in fold_split[split]:
-        for j in range(0, total_num[i_folder]):
+        for j in range(total_num[i_folder]):
             data_list.append({
                 'lidar_points': {
                     'lidar_path':
@@ -109,12 +110,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--root-path',
         type=str,
-        default='./data',                         # 학습 데이터셋 정리후 정의하기
+        default='./data/semantickitti',                         # 학습 데이터셋 정리후 정의하기
         help='specify the root path of dataset')
     parser.add_argument(
         '--out-dir',
         type=str,
-        default='./data',                          # 학습 데이터셋 정리후 정의하기
+        default='./data/semanctickitti',                          # 학습 데이터셋 정리후 정의하기
         required=False,
         help='name of info pkl')
     parser.add_argument('--extra-tag', type=str, default='semantickitti')

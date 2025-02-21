@@ -1,7 +1,20 @@
 _base_ = [
-    '../_base_/datasets/semi_semantickitti_seg.py', '../_base_/models/frnet.py',
-    '../_base_/schedules/schedule.py', '../_base_/default_runtime.py'
+    '../_base_/datasets/semi_semantickitti_seg.py', 
+    #'../_base_/models/frnet.py',
+    '../_base_/schedules/schedule.py', 
+    '../_base_/default_runtime.py'
 ]
+"""
+설정 병합 문제
+base 구성 파일 중 ../_base_/models/frnet.py에는 FRNet 모델에 필요한 voxel_encoder, backbone, decode_head 등 여러 파라미터들이 포함되어 있습니다23.
+해당 설정들이 최종 모델 구성에 직접 병합되어 LaserMix의 최상위 인자에 포함되면서, LaserMix의 생성자에서는 예상하지 않은 voxel_encoder 인자가 전달되고 있습니다.
+
+모델 구성 방식의 불일치
+LaserMix는 반지도학습 프레임워크에서 teacher-student 네트워크를 구성하기 위해 segmentor_student와 segmentor_teacher 인자를 받도록 설계되어 있습니다. 
+그러나 FRNet의 파라미터들은 이 내부 구성 요소에 포함되어야 할 설정인데, 최상위 모델 딕셔너리에 남아 LaserMix에 전달되면서 생성자와의 불일치가 발생합니다.
+"""
+
+
 custom_imports = dict(
     imports=['frnet.datasets', 'frnet.datasets.transforms', 'frnet.models'],
     allow_failed_imports=False)
@@ -215,7 +228,7 @@ segmentor = dict(
         norm_cfg=dict(type='SyncBN', eps=1e-3, momentum=0.01),
         channels=64,
         num_classes=20,    # frnet 코드 참조하여 추가
-        ignore_label=19,   # frnet 코드 참조하여 추가
+        ignore_index=19,   # frnet 코드 참조하여 추가
         dropout_ratio=0,
         loss_ce=dict(
             type='mmdet.CrossEntropyLoss',
@@ -295,7 +308,7 @@ model = dict(
     segmentor_teacher=segmentor,
     data_preprocessor=dict(
         type='MultiBranch3DDataPreprocessor',
-        data_preprocessor=segmentor['data_preprocessor']   #FRNet 전처리 사용
+        data_preprocessor=dict(H=64, W=512, fov_up=3.0, fov_down=-25.0, ignore_index=19),   #FRNet 전처리 사용
     ),
 
     loss_mse=(dict(type='mmdet.MSELoss', loss_weight=250)),
@@ -311,13 +324,13 @@ labeled_dataset = dict(
     type='SemanticKittiDataset',  
     data_root=data_root, pipeline=sup_pipeline, metainfo=metainfo,
     modality=input_modality, ignore_index=19, backend_args=backend_args,
-    ann_file='semantickitti_infos_train.10.pkl'
+    ann_file='semantickitti_infos_train.pkl'
 )
 unlabeled_dataset = dict(
     type='SemanticKittiDataset',
     data_root=data_root, pipeline=unsup_pipeline, metainfo=metainfo,
     modality=input_modality, ignore_index=19, backend_args=backend_args,
-    ann_file='semantickitti_infos_train.10-unlabeled.pkl',
+    ann_file='semantickitti_infos_train.-unlabeled.pkl',
 )
 train_dataloader = dict(
     batch_size=4, num_workers=4, persistent_workers=True,
