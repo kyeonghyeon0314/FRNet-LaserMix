@@ -194,9 +194,7 @@ unsup_pipeline = [
 segmentor = dict(
     type='FRNet',
     data_preprocessor=dict(type='FrustumRangePreprocessor',
-                           H=64, W=512, fov_up=3.0, 
-                           fov_down=-25.0, ignore_index=19
-                           ),
+                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=19),
     voxel_encoder=dict(
         type='FrustumFeatureEncoder',
         in_channels=4,
@@ -350,8 +348,8 @@ frnet 방식으로 수정
 # learning rate
 lr = 0.01
 optim_wrapper = dict(
-    type='AmpOptimWrapper',
-    loss_scale='dynamic',
+    type='OptimWrapper',
+    #loss_scale='dynamic',
     optimizer=dict(type='AdamW', lr=lr, betas=(0.9, 0.999), weight_decay=0.01, eps=1e-6),
     #clip_grad=dict(max_norm=10, norm_type=2),
 )
@@ -359,7 +357,7 @@ optim_wrapper = dict(
 param_scheduler = [
     dict(
         type='OneCycleLR',
-        total_steps=50000,
+        total_steps=150000,
         by_epoch=False,
         eta_max=lr,
         pct_start=0.2,
@@ -367,7 +365,7 @@ param_scheduler = [
         final_div_factor=100.0)
 ]
 
-train_cfg = dict(_delete_=True, type='IterBasedTrainLoop', max_iters=50000, val_interval=1000)
+train_cfg = dict(_delete_=True, type='IterBasedTrainLoop', max_iters=150000, val_interval=1500)
 
 
 

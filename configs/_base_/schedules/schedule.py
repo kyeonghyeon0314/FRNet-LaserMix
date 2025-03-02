@@ -7,13 +7,14 @@ iteration based training loop과 epoch based training loop 선택
 
 현재 
 iteration based training loop
+onecycle lr scheduler 1500k
 """
 
 
-lr = 0.01  # max learning rate
+lr = 0.01
 optim_wrapper = dict(
-    type='AmpOptimWrapper',
-    loss_scale='dynamic',
+    type='OptimWrapper',
+    #loss_scale='dynamic',
     optimizer=dict(type='AdamW', lr=lr, betas=(0.9, 0.999), weight_decay=0.01, eps=1e-6),
     #clip_grad=dict(max_norm=10, norm_type=2),
 )
@@ -33,7 +34,7 @@ param_scheduler = [
 param_scheduler = [
     dict(
         type='OneCycleLR',
-        total_steps=50000,
+        total_steps=150000,
         by_epoch=False,
         eta_max=lr,
         pct_start=0.2,
