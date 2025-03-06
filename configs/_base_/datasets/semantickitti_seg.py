@@ -5,6 +5,8 @@
 dataset_type = 'SemanticKittiDataset'
 data_root = 'data/semantickitti/'
 
+
+# 수정의 필요가 있어 보이지만 일단 보류
 class_names = [
     'car', 'bicycle', 'motorcycle', 'truck', 'bus', 'person', 'bicyclist',
     'motorcyclist', 'road', 'parking', 'sidewalk', 'other-ground', 'building',
