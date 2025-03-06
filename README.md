@@ -21,6 +21,7 @@
 ```
 추가 내용, LaserMix README 파일을 보면 mmdetection3d에 등록되었다고하는데 이는 데이터 증강 알고리즘의 LaserMix로 mmdetection3d/mmdet3d/datasets/transforms/transforms_3d.py 클래스로 존재
 
+
 # 모델 변환으로 인한 수정사항
 ## LaserMix의 loss 함수 분기 처리
 ```mmdet3d/models/segmentor/lasermix.py```의 loss 함수는 입력 형식에 따라 두 분기로 나누어진다.
@@ -38,8 +39,14 @@
 
 결론적으로, ```lasermix.py```의 line112, 113의 logits를 seg_logit으로 변환하면 된다.
 
+
+
+
 # 학습및 시험
 ## train
+
+19개의 학습 클래스를 Road, sidewalk, vehicle, unlabeled 총 4가지로 분류하여 재 학습한다.
+
 ```
 python tools/create_data.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py
 ```
