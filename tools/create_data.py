@@ -5,7 +5,7 @@ from pathlib import Path
 
 import mmengine
 
-total_num = {
+total_num = {  # semanticKITTI 데이터셋의 시퀀스 정보 : 스캔수
     0: 4541,
     1: 1101,
     2: 4661,
@@ -110,12 +110,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--root-path',
         type=str,
-        default='./data/semantickitti',                         # 학습 데이터셋 정리후 정의하기
+        default='./data/semantickitti',                         # default 경로 지정정
         help='specify the root path of dataset')
     parser.add_argument(
         '--out-dir',
         type=str,
-        default='./data/semanctickitti',                          # 학습 데이터셋 정리후 정의하기
+        default='./data/semanctickitti',                          
         required=False,
         help='name of info pkl')
     parser.add_argument('--extra-tag', type=str, default='semantickitti')

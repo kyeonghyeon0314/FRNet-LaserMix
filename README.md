@@ -40,6 +40,11 @@
 결론적으로, ```lasermix.py```의 line112, 113의 logits를 seg_logit으로 변환하면 된다.
 
 
+# MMdetection3D
+[mean_teacher_hook](https://mmdetection.readthedocs.io/en/3.x/_modules/mmdet/engine/hooks/mean_teacher_hook.html)
+
+위 링크를 참조하여 ```mmdet/engine/hooks/mean_teacher_hook.py``` 추가
+
 
 
 # 학습및 시험
@@ -55,14 +60,4 @@ python tools/create_data.py configs/lasermix_frnet/lasermix_frnet_semi_semantick
 
 ```
 python test.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py work_dirs/lasermix_frnet_semi_semantickitti_seg/best_miou_iter_18000.pth
-```
-자동차, 도로, 인도, 건물, 주차공간, 펜스, 나무, 그외 땅 의 정확도는 높고 나머지의 정확도는 낮은 것을 보아서는 자주 출몰되고 규모가 큰 개체에 대해서는 학습이 잘 이루어지지만,
-규모가 작고 자주 출몰하지 않는 오토바이나 사람같은 객체는 학습이 잘 이루어지지 않는 모습을 보입니다.
-```
-+---------+--------+---------+------------+--------+--------+--------+-----------+--------------+--------+---------+----------+--------------+----------+--------+------------+--------+---------+--------+--------------+--------+--------+---------+
-| classes | car    | bicycle | motorcycle | truck  | bus    | person | bicyclist | motorcyclist | road   | parking | sidewalk | other-ground | building | fence  | vegetation | trunck | terrian | pole   | traffic-sign | miou   | acc    | acc_cls |
-+---------+--------+---------+------------+--------+--------+--------+-----------+--------------+--------+---------+----------+--------------+----------+--------+------------+--------+---------+--------+--------------+--------+--------+---------+
-| results | 0.8865 | 0.0020  | 0.0003     | 0.0000 | 0.0014 | 0.0000 | 0.0000    | 0.0000       | 0.9473 | 0.5238  | 0.8137   | 0.0000       | 0.8399   | 0.5156 | 0.8511     | 0.4256 | 0.7552  | 0.0063 | 0.2485       | 0.3588 | 0.9004 | 0.4066  |
-+---------+--------+---------+------------+--------+--------+--------+-----------+--------------+--------+---------+----------+--------------+----------+--------+------------+--------+---------+--------+--------------+--------+--------+---------+
-2025/02/22 10:06:01 - mmengine - INFO - Iter(test) [4071/4071]    car: 0.8865  bicycle: 0.0020  motorcycle: 0.0003  truck: 0.0000  bus: 0.0014  person: 0.0000  bicyclist: 0.0000  motorcyclist: 0.0000  road: 0.9473  parking: 0.5238  sidewalk: 0.8137  other-ground: 0.0000  building: 0.8399  fence: 0.5156  vegetation: 0.8511  trunck: 0.4256  terrian: 0.7552  pole: 0.0063  traffic-sign: 0.2485  miou: 0.3588  acc: 0.9004  acc_cls: 0.4066  data_time: 0.0047  time: 0.0513
 ```

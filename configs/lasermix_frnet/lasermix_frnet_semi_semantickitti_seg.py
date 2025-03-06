@@ -4,192 +4,19 @@ _base_ = [
     '../_base_/schedules/schedule.py', 
     '../_base_/default_runtime.py'
 ]
-"""
-설정 병합 문제
-base 구성 파일 중 ../_base_/models/frnet.py에는 FRNet 모델에 필요한 voxel_encoder, backbone, decode_head 등 여러 파라미터들이 포함되어 있습니다23.
-해당 설정들이 최종 모델 구성에 직접 병합되어 LaserMix의 최상위 인자에 포함되면서, LaserMix의 생성자에서는 예상하지 않은 voxel_encoder 인자가 전달되고 있습니다.
 
-모델 구성 방식의 불일치
-LaserMix는 반지도학습 프레임워크에서 teacher-student 네트워크를 구성하기 위해 segmentor_student와 segmentor_teacher 인자를 받도록 설계되어 있습니다. 
-그러나 FRNet의 파라미터들은 이 내부 구성 요소에 포함되어야 할 설정인데, 최상위 모델 딕셔너리에 남아 LaserMix에 전달되면서 생성자와의 불일치가 발생합니다.
-"""
 
 
 custom_imports = dict(
     imports=['frnet.datasets', 'frnet.datasets.transforms', 'frnet.models'],
     allow_failed_imports=False)
 
-dataset_type = 'SemanticKittiDataset'
-data_root = 'data/semantickitti/'
-
-class_names = [
-    'car', 'bicycle', 'motorcycle', 'truck', 'bus', 'person', 'bicyclist',
-    'motorcyclist', 'road', 'parking', 'sidewalk', 'other-ground', 'building',
-    'fence', 'vegetation', 'trunck', 'terrian', 'pole', 'traffic-sign'
-]
-labels_map = {
-    0: 19,   # "unlabeled"
-    1: 19,   # "outlier" mapped to "unlabeled" --------------mapped
-    10: 0,   # "car"
-    11: 1,   # "bicycle"
-    13: 4,   # "bus" mapped to "other-vehicle" --------------mapped
-    15: 2,   # "motorcycle"
-    16: 4,   # "on-rails" mapped to "other-vehicle" ---------mapped
-    18: 3,   # "truck"
-    20: 4,   # "other-vehicle"
-    30: 5,   # "person"
-    31: 6,   # "bicyclist"
-    32: 7,   # "motorcyclist"
-    40: 8,   # "road"
-    44: 9,   # "parking"
-    48: 10,  # "sidewalk"
-    49: 11,  # "other-ground"
-    50: 12,  # "building"
-    51: 13,  # "fence"
-    52: 19,  # "other-structure" mapped to "unlabeled" ------mapped
-    60: 8,   # "lane-marking" to "road" ---------------------mapped
-    70: 14,  # "vegetation"
-    71: 15,  # "trunk"
-    72: 16,  # "terrain"
-    80: 17,  # "pole"
-    81: 18,  # "traffic-sign"
-    99: 19,  # "other-object" to "unlabeled" ----------------mapped
-    252: 0,  # "moving-car" to "car" ------------------------mapped
-    253: 6,  # "moving-bicyclist" to "bicyclist" ------------mapped
-    254: 5,  # "moving-person" to "person" ------------------mapped
-    255: 7,  # "moving-motorcyclist" to "motorcyclist" ------mapped
-    256: 4,  # "moving-on-rails" mapped to "other-vehic------mapped
-    257: 4,  # "moving-bus" mapped to "other-vehicle" -------mapped
-    258: 3,  # "moving-truck" to "truck" --------------------mapped
-    259: 4   # "moving-other"-vehicle to "other-vehicle"-----mapped
-}
 """
-현재 반지도학습을 위해 lasermix 정보를 가지고 왔음 cylinder3d를 frnet으로 변경 적용
-라벨링 데이터 10% 기준으로 작성되어있므로 향후 기준을 바꿔서 진행 할수 있도록 한다.
+datasets : NuScenesSegDataset  (SemanticKITTI 는 필요 없음)
+datasets.transforms : FrustumMix, RangeInterpolation, InstanceCopy
+models : FRNetBackbone, FrustumRangePreprocessor, FRHead, FrustumHead, BoundaryLoss, FRNet, FrustumFeatureEncoder
 """
 
-
-
-metainfo = dict(
-    classes=class_names, seg_label_mapping=labels_map, max_label=259
-)
-
-input_modality = dict(use_lidar=True, use_camera=False)
-backend_args = None
-branch_field = ['sup', 'unsup']
-
-randomness = dict(seed=1205, deterministic=False, diff_rank_seed=True)
-
-# pipeline used to augment labeled data,ㄴ
-# which will be sent to student model for supervised training.
-pre_transform = [
-    dict(
-        type='LoadPointsFromFile',
-        coord_type='LIDAR',
-        load_dim=4,
-        use_dim=4,
-        backend_args=backend_args),
-    dict(
-        type='LoadAnnotations3D',
-        with_bbox_3d=False,
-        with_label_3d=False,
-        with_seg_3d=True,
-        seg_3d_dtype='np.int32',
-        seg_offset=2**16,
-        dataset_type='semantickitti',
-        backend_args=backend_args),
-    dict(type='PointSegClassMapping'),
-    dict(
-        type='RandomFlip3D',
-        sync_2d=False,
-        flip_ratio_bev_horizontal=0.5,
-        flip_ratio_bev_vertical=0.5),
-    dict(
-        type='GlobalRotScaleTrans',
-        rot_range=[-3.1415926, 3.1415926],
-        scale_ratio_range=[0.95, 1.05],
-        translation_std=[0.1, 0.1, 0.1])
-]
-
-sup_pipeline = [
-    dict(
-        type='LoadPointsFromFile',
-        coord_type='LIDAR',
-        load_dim=4,
-        use_dim=4,
-        backend_args=backend_args),
-    dict(
-        type='LoadAnnotations3D',
-        with_bbox_3d=False,
-        with_label_3d=False,
-        with_seg_3d=True,
-        seg_3d_dtype='np.int32',
-        seg_offset=2**16,
-        dataset_type='semantickitti',
-        backend_args=backend_args),
-    dict(type='PointSegClassMapping'),
-    dict(
-        type='RandomFlip3D',
-        sync_2d=False,
-        flip_ratio_bev_horizontal=0.5,
-        flip_ratio_bev_vertical=0.5),
-    dict(
-        type='GlobalRotScaleTrans',
-        rot_range=[-3.1415926, 3.1415926],                 # FrustumMix 에 알맞게 rot_range 변경
-        scale_ratio_range=[0.95, 1.05],
-        translation_std=[0.1, 0.1, 0.1]),
-    dict(
-        type='FrustumMix',                                 # Student network에 FrustumMix 적용
-        H=64,
-        W=512,
-        fov_up=3.0,
-        fov_down=-25.0,
-        num_areas=[3, 4, 5, 6],
-        pre_transform=pre_transform,
-        prob=1.0),
-    dict(
-        type='InstanceCopy',
-        instance_classes=[1, 2, 3, 4, 5, 6, 7, 11, 15, 17, 18],     # 클래스 설정후 변경해야하는 부분  labels_map 기준
-        pre_transform=pre_transform,
-        prob=1.0),
-    dict(
-        type='RangeInterpolation',
-        H=64,
-        W=2048,
-        fov_up=3.0,
-        fov_down=-25.0,
-        ignore_index=19),
-    dict(
-        type='MultiBranch3D',                        # teacher-student network 구현
-        branch_field=branch_field,
-        sup=dict(type='Pack3DDetInputs', keys=['points', 'pts_semantic_mask']))
-]
-
-# pipeline used to augment unlabeled data,
-# which will be sent to teacher model for predicting pseudo instances.
-unsup_pipeline = [
-    dict(
-        type='LoadPointsFromFile',
-        coord_type='LIDAR',
-        load_dim=4,
-        use_dim=4,
-        backend_args=backend_args),
-    dict(
-        type='RandomFlip3D',
-        sync_2d=False,
-        flip_ratio_bev_horizontal=0.5,
-        flip_ratio_bev_vertical=0.5),
-    dict(
-        type='GlobalRotScaleTrans',
-        rot_range=[-0.78539816, 0.78539816],
-        scale_ratio_range=[0.95, 1.05],
-        translation_std=[0.1, 0.1, 0.1]),
-    dict(
-        type='MultiBranch3D',                        # teacher-student network 구현
-        branch_field=branch_field,
-        unsup=dict(
-            type='Pack3DDetInputs', keys=['points', 'pts_semantic_mask']))
-]
 
 segmentor = dict(
     type='FRNet',
@@ -317,60 +144,6 @@ model = dict(
     ),
     semi_test_cfg=dict(extract_feat_on='teacher', predict_on='teacher'))
 
-# quota
-labeled_dataset = dict(
-    type='SemanticKittiDataset',  
-    data_root=data_root, pipeline=sup_pipeline, metainfo=metainfo,
-    modality=input_modality, ignore_index=19, backend_args=backend_args,
-    ann_file='semantickitti_infos_train.pkl'
-)
-unlabeled_dataset = dict(
-    type='SemanticKittiDataset',
-    data_root=data_root, pipeline=unsup_pipeline, metainfo=metainfo,
-    modality=input_modality, ignore_index=19, backend_args=backend_args,
-    ann_file='semantickitti_infos_train.-unlabeled.pkl',
-)
-train_dataloader = dict(
-    batch_size=4, num_workers=4, persistent_workers=True,
-    sampler=dict(
-        type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1],
-    ),
-    dataset=dict(
-        type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset],
-    )
-)
 
-
-
-"""
-frnet 방식으로 수정
-"""
-# learning rate
-lr = 0.01
-optim_wrapper = dict(
-    type='OptimWrapper',
-    #loss_scale='dynamic',
-    optimizer=dict(type='AdamW', lr=lr, betas=(0.9, 0.999), weight_decay=0.01, eps=1e-6),
-    #clip_grad=dict(max_norm=10, norm_type=2),
-)
-
-param_scheduler = [
-    dict(
-        type='OneCycleLR',
-        total_steps=150000,
-        by_epoch=False,
-        eta_max=lr,
-        pct_start=0.2,
-        div_factor=25.0,
-        final_div_factor=100.0)
-]
-
-train_cfg = dict(_delete_=True, type='IterBasedTrainLoop', max_iters=150000, val_interval=1500)
-
-
-
-# default hook
-default_hooks = dict(checkpoint=dict(by_epoch=False, save_best='miou', rule='greater'))
-log_processor = dict(by_epoch=False)
-
-custom_hooks = [dict(type='mmdet.MeanTeacherHook', momentum=0.01)]
+# EMA 가중치 업데이트 방식, mmdet에 추가가 되어 있지 않음 lasermix.py에 직접적으로 구현되어 있는것으로 확인된다.
+# custom_hooks = [dict(type='mmdet.MeanTeacherHook', momentum=0.01)]  

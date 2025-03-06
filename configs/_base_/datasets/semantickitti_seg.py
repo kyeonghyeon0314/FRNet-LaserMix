@@ -2,77 +2,93 @@
 # For labels_map we follow the uniform format of MMDetection & MMSegmentation
 # i.e. we consider the unlabeled class as the last one, which is different
 # from the original implementation of some methods e.g. Cylinder3D.
+_base_ = [
+    '../_base_/datasets/semi_semantickitti_seg.py', 
+    #'../_base_/models/frnet.py',
+    '../_base_/schedules/schedule.py', 
+    '../_base_/default_runtime.py'
+]
+"""
+설정 병합 문제
+base 구성 파일 중 ../_base_/models/frnet.py에는 FRNet 모델에 필요한 voxel_encoder, backbone, decode_head 등 여러 파라미터들이 포함되어 있습니다23.
+해당 설정들이 최종 모델 구성에 직접 병합되어 LaserMix의 최상위 인자에 포함되면서, LaserMix의 생성자에서는 예상하지 않은 voxel_encoder 인자가 전달되고 있습니다.
 
+모델 구성 방식의 불일치
+LaserMix는 반지도학습 프레임워크에서 teacher-student 네트워크를 구성하기 위해 segmentor_student와 segmentor_teacher 인자를 받도록 설계되어 있습니다. 
+그러나 FRNet의 파라미터들은 이 내부 구성 요소에 포함되어야 할 설정인데, 최상위 모델 딕셔너리에 남아 LaserMix에 전달되면서 생성자와의 불일치가 발생합니다.
 """
-반지도 학습 프레임 
-lasermix 사용
-"""
+
 dataset_type = 'SemanticKittiDataset'
 data_root = 'data/semantickitti/'
+
 class_names = [
     'car', 'bicycle', 'motorcycle', 'truck', 'bus', 'person', 'bicyclist',
     'motorcyclist', 'road', 'parking', 'sidewalk', 'other-ground', 'building',
     'fence', 'vegetation', 'trunck', 'terrian', 'pole', 'traffic-sign'
 ]
+
+"""
+19 : unlabeled
+0 : car
+8 : road
+10 : sidewalk
+4 : other-vehicle
+
+labels_map 위 클래스로 수정완료
+
+"""
 labels_map = {
-    0: 19,  # "unlabeled"
-    1: 19,  # "outlier" mapped to "unlabeled" --------------mapped
-    10: 0,  # "car"
-    11: 1,  # "bicycle"
-    13: 4,  # "bus" mapped to "other-vehicle" --------------mapped
-    15: 2,  # "motorcycle"
-    16: 4,  # "on-rails" mapped to "other-vehicle" ---------mapped
-    18: 3,  # "truck"
-    20: 4,  # "other-vehicle"
-    30: 5,  # "person"
-    31: 6,  # "bicyclist"
-    32: 7,  # "motorcyclist"
-    40: 8,  # "road"
-    44: 9,  # "parking"
+    0: 19,   # "unlabeled"
+    1: 19,   # "outlier" mapped to "unlabeled"           --------------mapped
+    10: 0,   # "car"
+    11: 4,   # "bicycle"  mapped to "other-vehicle"      --------------mapped
+    13: 4,   # "bus" mapped to "other-vehicle"           --------------mapped
+    15: 4,   # "motorcycle" mapped to "other-vehicle"    --------------mapped
+    16: 19,   # "on-rails" mapped to "unlabeled"         --------------mapped
+    18: 4,   # "truck" mapped to "other-vehicle"         --------------mapped
+    20: 4,   # "other-vehicle"
+    30: 19,  # "person" mapped to "unlabeled"            --------------mapped
+    31: 4,   # "bicyclist" mapped to "ohter-vehicle"     --------------mapped
+    32: 4,   # "motorcyclist" mapped to "other-vehicle"  --------------mapped
+    40: 8,   # "road"
+    44: 19,  # "parking" mapped to "unlabeled"           --------------mapped
     48: 10,  # "sidewalk"
-    49: 11,  # "other-ground"
-    50: 12,  # "building"
-    51: 13,  # "fence"
-    52: 19,  # "other-structure" mapped to "unlabeled" ------mapped
-    60: 8,  # "lane-marking" to "road" ---------------------mapped
-    70: 14,  # "vegetation"
-    71: 15,  # "trunk"
-    72: 16,  # "terrain"
-    80: 17,  # "pole"
-    81: 18,  # "traffic-sign"
-    99: 19,  # "other-object" to "unlabeled" ----------------mapped
-    252: 0,  # "moving-car" to "car" ------------------------mapped
-    253: 6,  # "moving-bicyclist" to "bicyclist" ------------mapped
-    254: 5,  # "moving-person" to "person" ------------------mapped
-    255: 7,  # "moving-motorcyclist" to "motorcyclist" ------mapped
-    256: 4,  # "moving-on-rails" mapped to "other-vehic------mapped
-    257: 4,  # "moving-bus" mapped to "other-vehicle" -------mapped
-    258: 3,  # "moving-truck" to "truck" --------------------mapped
-    259: 4  # "moving-other"-vehicle to "other-vehicle"-----mapped
+    49: 19,  # "other-ground" mapped to "unlabeled"      --------------mapped
+    50: 19,  # "building" mapped to "unlabeled"          --------------mapped
+    51: 19,  # "fence" mapped to "unlabeled"             --------------mapped
+    52: 19,  # "other-structure" mapped to "unlabeled"   --------------mapped
+    60: 8,   # "lane-marking" to "road"                  --------------mapped
+    70: 19,  # "vegetation" mapped to  "unlabeled"       --------------mapped
+    71: 4,   # "trunk" mapped to "other-vehicle"         --------------mapped
+    72: 19,  # "terrain" mapped to "unlabeled"           --------------mapped
+    80: 19,  # "pole" mapped to "unlabeled"              --------------mapped 
+    81: 19,  # "traffic-sign" mapped to "unlabeled"      --------------mapped
+    99: 19,  # "other-object" to "unlabeled"           ----------------mapped
+    252: 0,  # "moving-car" to "car"           ------------------------mapped
+    253: 4,  # "moving-bicyclist" to "other-vehicle"       ------------mapped
+    254: 19, # "moving-person" to "unlabeled"        ------------------mapped
+    255: 4,  # "moving-motorcyclist" to "other-vehicle" ---------------mapped
+    256: 4,  # "moving-on-rails" mapped to "other-vehicle" ------------mapped
+    257: 4,  # "moving-bus" mapped to "other-vehicle"           -------mapped
+    258: 4,  # "moving-truck" to "other-vehicle"   --------------------mapped
+    259: 4   # "moving-other"-vehicle to "other-vehicle"          -----mapped
 }
+"""
+현재 반지도학습을 위해 lasermix 정보를 가지고 왔음 cylinder3d를 frnet으로 변경 적용
+Teacher-student Network 기반의 완전 지도 학습 , 선행학습된 Teacher model을 통한 지도 학습 적용
+"""
 
 metainfo = dict(
-    classes=class_names, seg_label_mapping=labels_map, max_label=259)
+    classes=class_names, seg_label_mapping=labels_map, max_label=259
+)
 
 input_modality = dict(use_lidar=True, use_camera=False)
-
-# Example to use different file client
-# Method 1: simply set the data root and let the file I/O module
-# automatically infer from prefix (not support LMDB and Memcache yet)
-
-# data_root = 's3://openmmlab/datasets/detection3d/semantickitti/'
-
-# Method 2: Use backend_args, file_client_args in versions before 1.1.0
-# backend_args = dict(
-#     backend='petrel',
-#     path_mapping=dict({
-#         './data/': 's3://openmmlab/datasets/detection3d/',
-#          'data/': 's3://openmmlab/datasets/detection3d/'
-#      }))
 backend_args = None
-
 branch_field = ['sup', 'unsup']
-# pipeline used to augment labeled data,
+
+randomness = dict(seed=1205, deterministic=False, diff_rank_seed=True)
+
+# pipeline used to augment labeled data,ㄴ
 # which will be sent to student model for supervised training.
 pre_transform = [
     dict(
@@ -102,7 +118,6 @@ pre_transform = [
         scale_ratio_range=[0.95, 1.05],
         translation_std=[0.1, 0.1, 0.1])
 ]
-
 
 sup_pipeline = [
     dict(
@@ -183,6 +198,7 @@ unsup_pipeline = [
         unsup=dict(
             type='Pack3DDetInputs', keys=['points', 'pts_semantic_mask']))
 ]
+
 test_pipeline = [
     dict(
         type='LoadPointsFromFile',
@@ -278,22 +294,23 @@ labeled_dataset = dict(
     ignore_index=19,
     backend_args=backend_args)
 
+# unlabeled_dataset을 활용하지 않으므로 처리해야하는 부분분
 unlabeled_dataset = dict(
     type=dataset_type,
-    data_root=data_root,
-    ann_file='semantickitti_infos_train.pkl',
-    pipeline=unsup_pipeline,
+    data_root=data_root, 
+    pipeline=unsup_pipeline, 
     metainfo=metainfo,
-    modality=input_modality,
-    ignore_index=19,
-    backend_args=backend_args)
-
+    modality=input_modality, 
+    ignore_index=19, 
+    backend_args=backend_args,
+    ann_file='semantickitti_infos_train.-unlabeled.pkl',
+)
 train_dataloader = dict(
-    batch_size=2,
+    batch_size=4,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(
-        type='mmdet.MultiSourceSampler', batch_size=2, source_ratio=[1, 1]),
+        type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1]),
     dataset=dict(
         type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset]))
 val_dataloader = dict(
@@ -322,3 +339,8 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 tta_model = dict(type='Seg3DTTAModel')
+
+
+
+
+
