@@ -78,11 +78,11 @@ class Det3DVisualizationHook(Hook):
                           'needs to be excluded.')
         self.vis_task = vis_task
 
-        if show and wait_time == -1:
+        if wait_time == -1:
             print_log(
                 'Manual control mode, press [Right] to next sample.',
                 logger='current')
-        elif show:
+        else:
             print_log(
                 'Autoplay mode, press [SPACE] to pause.', logger='current')
         self.wait_time = wait_time

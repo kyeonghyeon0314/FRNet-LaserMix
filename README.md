@@ -6,19 +6,12 @@
 # 추가해야할 사항들 
 - 데이터셋에 맞는 data_root 조정
 - mmdetection3d 설치
+```
+cd mmdetection3d
+pip install -v -e .
+```
 - mmdetection의 mmdet3d를 지우고 lasermix의 mmdet3d로 대체(기존 mmdetection3d에는 model에 lasermix가 등록되어 있지 않음)
-- [LaserMix/DATA_PREPARE.MD](https://github.com/ldkong1205/LaserMix/blob/main/docs/DATA_PREPARE.md)에 나오있는 [링크](https://drive.google.com/drive/folders/1PInw2Wvt-vgNzOxlSd2EiDANrTsWV7w1)에서 ```.pkl```을 다운 받고 아래 디렉토리 경로로 이동
 
-```
-└── semantickitti
-    ├── sequences
-    ├── semantickitti_infos_train.pkl
-    ├── semantickitti_infos_val.pkl
-    ├── ...
-    ├── semantickitti_infos_train.10.pkl
-    ├── semantickitti_infos_train.10-unlabeled.pkl
-    └── ...
-```
 추가 내용, LaserMix README 파일을 보면 mmdetection3d에 등록되었다고하는데 이는 데이터 증강 알고리즘의 LaserMix로 mmdetection3d/mmdet3d/datasets/transforms/transforms_3d.py 클래스로 존재
 
 
@@ -37,14 +30,17 @@
 
 - FRNet의 최종 ```decode_head```로 ```FRhead```를 사용하는데 이는 ```['seg_logit']```으로 접근한다. 
 
-결론적으로, ```lasermix.py```의 line112, 113의 logits를 seg_logit으로 변환하면 된다.
+결론적으로, ```lasermix.py```의 line112, 113의 ```'logits'```를 ```'seg_logit'```으로 변환하면 된다.
 
 
 # MMdetection3D
 [mean_teacher_hook](https://mmdetection.readthedocs.io/en/3.x/_modules/mmdet/engine/hooks/mean_teacher_hook.html)
 
-위 링크를 참조하여 ```mmdet/engine/hooks/mean_teacher_hook.py``` 추가
-
+현재 configs/lasermix_frnet/lasermix_frnet_smantickitti_seg.py 마지막 줄에 mmdet.MeanTeacherHook 을 부른 코드가 존재하는데 이는 EMA 업데이트를 위한 mmdetectio3d의 hook이다.
+그러나 LaserMix의 mmdet 디렉토리에는 해당 코드가 존재하지 않고 mmdet/models/segmentors/lasermix.py 에서 mean_teacher 방식으로 EMA 형식으로 checkpoints 를 업데이트 하는것으로 확인된다. 아래 두 방법중 하나의 방법으로 설계할 예정
+- 위 링크를 참조하여 ```mmdet/engine/hooks/mean_teacher_hook.py``` 추가 
+- MMdetection3D 기준으로 teacher-student network 다시 설계
+- lasermix.py를 따라 
 
 
 # 학습및 시험

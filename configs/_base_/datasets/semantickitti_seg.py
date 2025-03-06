@@ -2,22 +2,6 @@
 # For labels_map we follow the uniform format of MMDetection & MMSegmentation
 # i.e. we consider the unlabeled class as the last one, which is different
 # from the original implementation of some methods e.g. Cylinder3D.
-_base_ = [
-    '../_base_/datasets/semi_semantickitti_seg.py', 
-    #'../_base_/models/frnet.py',
-    '../_base_/schedules/schedule.py', 
-    '../_base_/default_runtime.py'
-]
-"""
-설정 병합 문제
-base 구성 파일 중 ../_base_/models/frnet.py에는 FRNet 모델에 필요한 voxel_encoder, backbone, decode_head 등 여러 파라미터들이 포함되어 있습니다23.
-해당 설정들이 최종 모델 구성에 직접 병합되어 LaserMix의 최상위 인자에 포함되면서, LaserMix의 생성자에서는 예상하지 않은 voxel_encoder 인자가 전달되고 있습니다.
-
-모델 구성 방식의 불일치
-LaserMix는 반지도학습 프레임워크에서 teacher-student 네트워크를 구성하기 위해 segmentor_student와 segmentor_teacher 인자를 받도록 설계되어 있습니다. 
-그러나 FRNet의 파라미터들은 이 내부 구성 요소에 포함되어야 할 설정인데, 최상위 모델 딕셔너리에 남아 LaserMix에 전달되면서 생성자와의 불일치가 발생합니다.
-"""
-
 dataset_type = 'SemanticKittiDataset'
 data_root = 'data/semantickitti/'
 
@@ -156,8 +140,8 @@ sup_pipeline = [
         pre_transform=pre_transform,
         prob=1.0),
     dict(
-        type='InstanceCopy',
-        instance_classes=[1, 2, 3, 4, 5, 6, 7, 11, 15, 17, 18],     # 클래스 설정후 변경해야하는 부분  labels_map 기준
+        type='InstanceCopy',                         # 데이터수가 적은 개별 객체를 위한 데이터 증강기법
+        instance_classes=[4],                        # 개별 객체의 단위 복사 클래스 other-vehicle만 사용
         pre_transform=pre_transform,
         prob=1.0),
     dict(
@@ -305,14 +289,17 @@ unlabeled_dataset = dict(
     backend_args=backend_args,
     ann_file='semantickitti_infos_train.-unlabeled.pkl',
 )
+
 train_dataloader = dict(
     batch_size=4,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(
         type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1]),
-    dataset=dict(
-        type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset]))
+    #dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset])    # labeled data만 적용 할지 선택
+    dataset=labeled_dataset # labeled_dataset
+)
+
 val_dataloader = dict(
     batch_size=1,
     num_workers=1,
@@ -329,6 +316,7 @@ val_dataloader = dict(
         ignore_index=19,
         test_mode=True,
         backend_args=backend_args))
+
 test_dataloader = val_dataloader
 
 val_evaluator = dict(type='SegMetric')
