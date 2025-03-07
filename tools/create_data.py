@@ -115,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--out-dir',
         type=str,
-        default='./data/semanctickitti',                          
+        default='./data/semantickitti',                          
         required=False,
         help='name of info pkl')
     parser.add_argument('--extra-tag', type=str, default='semantickitti')

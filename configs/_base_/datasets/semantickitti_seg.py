@@ -8,9 +8,7 @@ data_root = 'data/semantickitti/'
 
 # 수정의 필요가 있어 보이지만 일단 보류
 class_names = [
-    'car', 'bicycle', 'motorcycle', 'truck', 'bus', 'person', 'bicyclist',
-    'motorcyclist', 'road', 'parking', 'sidewalk', 'other-ground', 'building',
-    'fence', 'vegetation', 'trunck', 'terrian', 'pole', 'traffic-sign'
+    'car', 'road', 'sidewalk'
 ]
 
 """
@@ -298,8 +296,8 @@ train_dataloader = dict(
     persistent_workers=True,
     sampler=dict(
         type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1]),
-    #dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset])    # labeled data만 적용 할지 선택
-    dataset=labeled_dataset # labeled_dataset
+    dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, labeled_dataset])    # labeled data만 적용 할지 선택
+    #dataset=labeled_dataset # labeled_dataset
 )
 
 val_dataloader = dict(

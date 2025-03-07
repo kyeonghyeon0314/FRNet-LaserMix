@@ -42,6 +42,9 @@ pip install -v -e .
 - MMdetection3D 기준으로 teacher-student network 다시 설계
 - lasermix.py를 따라 
 
+```/mmdet/__init.py__``` 일부 수정정
+
+
 
 # 학습및 시험
 ## train

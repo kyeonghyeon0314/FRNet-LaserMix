@@ -50,7 +50,7 @@ train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=36, val_interval=1)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 """
-train_cfg = dict(_delete_=True, type='IterBasedTrainLoop', max_iters=150000, val_interval=1500)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=150000, val_interval=1500)
 val_cfg = dict()
 test_cfg = dict()
 

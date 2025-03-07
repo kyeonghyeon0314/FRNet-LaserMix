@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/semi_semantickitti_seg.py', 
+    '../_base_/datasets/semantickitti_seg.py', 
     #'../_base_/models/frnet.py',
     '../_base_/schedules/schedule.py', 
     '../_base_/default_runtime.py'
@@ -242,7 +242,7 @@ segmentor_teacher = dict(
             ignore_index=19,
             indices=4),
     ],
-    init_cfg=dict(type='Pretrain', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
+    init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
     )
 model = dict(
     type='LaserMix', 
