@@ -22,40 +22,40 @@ labels_map 위 클래스로 수정완료
 
 """
 labels_map = {
-    0: 19,   # "unlabeled"
-    1: 19,   # "outlier" mapped to "unlabeled"           --------------mapped
+    0: 4,    # "unlabeled"
+    1: 4,    # "outlier" mapped to "unlabeled"           --------------mapped
     10: 0,   # "car"
-    11: 4,   # "bicycle"  mapped to "other-vehicle"      --------------mapped
-    13: 4,   # "bus" mapped to "other-vehicle"           --------------mapped
-    15: 4,   # "motorcycle" mapped to "other-vehicle"    --------------mapped
-    16: 19,   # "on-rails" mapped to "unlabeled"         --------------mapped
-    18: 4,   # "truck" mapped to "other-vehicle"         --------------mapped
-    20: 4,   # "other-vehicle"
-    30: 19,  # "person" mapped to "unlabeled"            --------------mapped
-    31: 4,   # "bicyclist" mapped to "ohter-vehicle"     --------------mapped
-    32: 4,   # "motorcyclist" mapped to "other-vehicle"  --------------mapped
-    40: 8,   # "road"
-    44: 19,  # "parking" mapped to "unlabeled"           --------------mapped
-    48: 10,  # "sidewalk"
-    49: 19,  # "other-ground" mapped to "unlabeled"      --------------mapped
-    50: 19,  # "building" mapped to "unlabeled"          --------------mapped
-    51: 19,  # "fence" mapped to "unlabeled"             --------------mapped
-    52: 19,  # "other-structure" mapped to "unlabeled"   --------------mapped
-    60: 8,   # "lane-marking" to "road"                  --------------mapped
-    70: 19,  # "vegetation" mapped to  "unlabeled"       --------------mapped
-    71: 4,   # "trunk" mapped to "other-vehicle"         --------------mapped
-    72: 19,  # "terrain" mapped to "unlabeled"           --------------mapped
-    80: 19,  # "pole" mapped to "unlabeled"              --------------mapped 
-    81: 19,  # "traffic-sign" mapped to "unlabeled"      --------------mapped
-    99: 19,  # "other-object" to "unlabeled"           ----------------mapped
+    11: 3,   # "bicycle"  mapped to "other-vehicle"      --------------mapped
+    13: 3,   # "bus" mapped to "other-vehicle"           --------------mapped
+    15: 3,   # "motorcycle" mapped to "other-vehicle"    --------------mapped
+    16: 4,   # "on-rails" mapped to "unlabeled"         --------------mapped
+    18: 3,   # "truck" mapped to "other-vehicle"         --------------mapped
+    20: 3,   # "other-vehicle"
+    30: 4,   # "person" mapped to "unlabeled"            --------------mapped
+    31: 3,   # "bicyclist" mapped to "ohter-vehicle"     --------------mapped
+    32: 3,   # "motorcyclist" mapped to "other-vehicle"  --------------mapped
+    40: 1,   # "road"
+    44: 4,   # "parking" mapped to "unlabeled"           --------------mapped
+    48: 2,  # "sidewalk"
+    49: 4,  # "other-ground" mapped to "unlabeled"      --------------mapped
+    50: 4,  # "building" mapped to "unlabeled"          --------------mapped
+    51: 4,  # "fence" mapped to "unlabeled"             --------------mapped
+    52: 4,  # "other-structure" mapped to "unlabeled"   --------------mapped
+    60: 1,   # "lane-marking" to "road"                  --------------mapped
+    70: 4,  # "vegetation" mapped to  "unlabeled"       --------------mapped
+    71: 3,   # "trunk" mapped to "other-vehicle"         --------------mapped
+    72: 4,  # "terrain" mapped to "unlabeled"           --------------mapped
+    80: 4,  # "pole" mapped to "unlabeled"              --------------mapped 
+    81: 4,  # "traffic-sign" mapped to "unlabeled"      --------------mapped
+    99: 4,  # "other-object" to "unlabeled"           ----------------mapped
     252: 0,  # "moving-car" to "car"           ------------------------mapped
-    253: 4,  # "moving-bicyclist" to "other-vehicle"       ------------mapped
-    254: 19, # "moving-person" to "unlabeled"        ------------------mapped
-    255: 4,  # "moving-motorcyclist" to "other-vehicle" ---------------mapped
-    256: 4,  # "moving-on-rails" mapped to "other-vehicle" ------------mapped
-    257: 4,  # "moving-bus" mapped to "other-vehicle"           -------mapped
-    258: 4,  # "moving-truck" to "other-vehicle"   --------------------mapped
-    259: 4   # "moving-other"-vehicle to "other-vehicle"          -----mapped
+    253: 3,  # "moving-bicyclist" to "other-vehicle"       ------------mapped
+    254: 4, # "moving-person" to "unlabeled"        ------------------mapped
+    255: 3,  # "moving-motorcyclist" to "other-vehicle" ---------------mapped
+    256: 3,  # "moving-on-rails" mapped to "other-vehicle" ------------mapped
+    257: 3,  # "moving-bus" mapped to "other-vehicle"           -------mapped
+    258: 3,  # "moving-truck" to "other-vehicle"   --------------------mapped
+    259: 3   # "moving-other"-vehicle to "other-vehicle"          -----mapped
 }
 """
 현재 반지도학습을 위해 lasermix 정보를 가지고 왔음 cylinder3d를 frnet으로 변경 적용
@@ -141,7 +141,7 @@ sup_pipeline = [
         prob=1.0),
     dict(
         type='InstanceCopy',                         # 데이터수가 적은 개별 객체를 위한 데이터 증강기법
-        instance_classes=[4],                        # 개별 객체의 단위 복사 클래스 other-vehicle만 사용
+        instance_classes=[3],                        # 개별 객체의 단위 복사 클래스 other-vehicle만 사용
         pre_transform=pre_transform,
         prob=1.0),
     dict(
@@ -150,7 +150,7 @@ sup_pipeline = [
         W=2048,
         fov_up=3.0,
         fov_down=-25.0,
-        ignore_index=19),
+        ignore_index=4),
     dict(
         type='MultiBranch3D',                        # teacher-student network 구현
         branch_field=branch_field,
@@ -206,7 +206,7 @@ test_pipeline = [
         W=2048,
         fov_up=3.0,
         fov_down=-25.0,
-        ignore_index=19),
+        ignore_index=4),
     dict(type='Pack3DDetInputs', keys=['points'], meta_keys=['num_points'])
 ]
 tta_pipeline = [
@@ -232,7 +232,7 @@ tta_pipeline = [
         W=2048,
         fov_up=3.0,
         fov_down=-25.0,
-        ignore_index=19),
+        ignore_index=4),
     dict(
         type='TestTimeAug',
         transforms=[[
@@ -275,19 +275,19 @@ labeled_dataset = dict(
     pipeline=sup_pipeline,
     metainfo=metainfo,
     modality=input_modality,
-    ignore_index=19,
+    ignore_index=4,
     backend_args=backend_args)
 
 # unlabeled_dataset을 활용하지 않으므로 처리해야하는 부분분
-unlabeled_dataset = dict(
+labeled_dataset_teacher = dict(
     type=dataset_type,
     data_root=data_root, 
     pipeline=unsup_pipeline, 
     metainfo=metainfo,
     modality=input_modality, 
-    ignore_index=19, 
+    ignore_index=4, 
     backend_args=backend_args,
-    ann_file='semantickitti_infos_train.-unlabeled.pkl',
+    ann_file='semantickitti_infos_train.pkl',
 )
 
 train_dataloader = dict(
@@ -296,7 +296,7 @@ train_dataloader = dict(
     persistent_workers=True,
     sampler=dict(
         type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1]),
-    dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, labeled_dataset])    # labeled data만 적용 할지 선택
+    dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, labeled_dataset_teacher])    # labeled data만 적용 할지 선택
     #dataset=labeled_dataset # labeled_dataset
 )
 
@@ -313,7 +313,7 @@ val_dataloader = dict(
         pipeline=test_pipeline,
         metainfo=metainfo,
         modality=input_modality,
-        ignore_index=19,
+        ignore_index=4,
         test_mode=True,
         backend_args=backend_args))
 

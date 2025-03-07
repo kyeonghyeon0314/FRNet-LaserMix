@@ -28,7 +28,7 @@ models : FRNetBackbone, FrustumRangePreprocessor, FRHead, FrustumHead, BoundaryL
 segmentor_student = dict(
     type='FRNet',
     data_preprocessor=dict(type='FrustumRangePreprocessor',
-                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=19),
+                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=4),
     voxel_encoder=dict(
         type='FrustumFeatureEncoder',
         in_channels=4,
@@ -60,7 +60,7 @@ segmentor_student = dict(
         norm_cfg=dict(type='SyncBN', eps=1e-3, momentum=0.01),
         channels=64,
         num_classes=5,                                          # labels_map 수정한 것을 바탕으로 클래수 수정 (unlabeled 도 포함)
-        ignore_index=19,   # frnet 코드 참조하여 추가
+        ignore_index=4,   # frnet 코드 참조하여 추가
         dropout_ratio=0,
         loss_ce=dict(
             type='mmdet.CrossEntropyLoss',
@@ -83,7 +83,7 @@ segmentor_student = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19),
+            ignore_index=4),
         dict(
             type='FrustumHead',
             channels=128,
@@ -98,7 +98,7 @@ segmentor_student = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=2),
         dict(
             type='FrustumHead',
@@ -114,7 +114,7 @@ segmentor_student = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=3),
         dict(
             type='FrustumHead',
@@ -130,14 +130,14 @@ segmentor_student = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=4),
     ])
 
 segmentor_teacher = dict(
     type='FRNet',
     data_preprocessor=dict(type='FrustumRangePreprocessor',
-                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=19),
+                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=4),
     voxel_encoder=dict(
         type='FrustumFeatureEncoder',
         in_channels=4,
@@ -169,7 +169,7 @@ segmentor_teacher = dict(
         norm_cfg=dict(type='SyncBN', eps=1e-3, momentum=0.01),
         channels=64,
         num_classes=5,                                          # labels_map 수정한 것을 바탕으로 클래수 수정 (unlabeled 도 포함)
-        ignore_index=19,   # frnet 코드 참조하여 추가
+        ignore_index=4,   # frnet 코드 참조하여 추가
         dropout_ratio=0,
         loss_ce=dict(
             type='mmdet.CrossEntropyLoss',
@@ -192,7 +192,7 @@ segmentor_teacher = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19),
+            ignore_index=4),
         dict(
             type='FrustumHead',
             channels=128,
@@ -207,7 +207,7 @@ segmentor_teacher = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=2),
         dict(
             type='FrustumHead',
@@ -223,7 +223,7 @@ segmentor_teacher = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=3),
         dict(
             type='FrustumHead',
@@ -239,7 +239,7 @@ segmentor_teacher = dict(
                 type='LovaszLoss', loss_weight=1.5, reduction='none'),
             loss_boundary=dict(type='BoundaryLoss', loss_weight=1.0),
             conv_seg_kernel_size=1,
-            ignore_index=19,
+            ignore_index=4,
             indices=4),
     ],
     init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
@@ -251,12 +251,12 @@ model = dict(
     data_preprocessor=dict(
         type='MultiBranch3DDataPreprocessor',
         data_preprocessor=dict(type='FrustumRangePreprocessor',
-                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=19),   #FRNet 전처리 사용
+                           H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=4),   #FRNet 전처리 사용
     ),
 
     loss_mse=(dict(type='mmdet.MSELoss', loss_weight=250)),
     semi_train_cfg=dict(
-        freeze_teacher=True, pseudo_thr=0.9, ignore_label=19,
+        freeze_teacher=True, pseudo_thr=0.9, ignore_label=4,
         pitch_angles=[-25, 3], num_areas=[4, 5, 6, 7, 8],
         sup_weight=1, unsup_weight=1,
     ),

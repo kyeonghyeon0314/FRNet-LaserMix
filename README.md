@@ -33,26 +33,15 @@ pip install -v -e .
 결론적으로, ```lasermix.py```의 line112, 113의 ```'logits'```를 ```'seg_logit'```으로 변환하면 된다.
 
 
-# MMdetection3D
-[mean_teacher_hook](https://mmdetection.readthedocs.io/en/3.x/_modules/mmdet/engine/hooks/mean_teacher_hook.html)
-
-현재 configs/lasermix_frnet/lasermix_frnet_smantickitti_seg.py 마지막 줄에 mmdet.MeanTeacherHook 을 부른 코드가 존재하는데 이는 EMA 업데이트를 위한 mmdetectio3d의 hook이다.
-그러나 LaserMix의 mmdet 디렉토리에는 해당 코드가 존재하지 않고 mmdet/models/segmentors/lasermix.py 에서 mean_teacher 방식으로 EMA 형식으로 checkpoints 를 업데이트 하는것으로 확인된다. 아래 두 방법중 하나의 방법으로 설계할 예정
-- 위 링크를 참조하여 ```mmdet/engine/hooks/mean_teacher_hook.py``` 추가 
-- MMdetection3D 기준으로 teacher-student network 다시 설계
-- lasermix.py를 따라 
-
-```/mmdet/__init.py__``` 일부 수정정
-
-
 
 # 학습및 시험
 ## train
 
-19개의 학습 클래스를 Road, sidewalk, vehicle, unlabeled 총 4가지로 분류하여 재 학습한다.
+- 기존 MMdetection의 19개의 학습 클래스를 Road, sidewalk, car, other-vehicle, unlabeled 총 5가지로 분류
+- teacher-network에 사전 학습된 checkpoints 적용 
 
 ```
-python tools/create_data.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py
+python train.py configs/lasermix_frnet/lasermix_frnet_semantickitti_seg.py
 ```
 
 ## test

@@ -80,6 +80,11 @@ class FrustumRangePreprocessor(BaseDataPreprocessor):
 
         coors = []
         voxels = []
+        # 디버깅 
+        #print(f"포인트 클라우드 배치수:{len(points)}")
+        #for i , res in enumerate(points):
+        #    print(f"배치 {i} 포인트수 : {res.shape[0]}")
+
 
         for i, res in enumerate(points):
             depth = torch.linalg.norm(res[:, :3], 2, dim=1)
@@ -107,6 +112,18 @@ class FrustumRangePreprocessor(BaseDataPreprocessor):
             coors.append(res_coors)
             voxels.append(res)
 
+            # 빈 voxels 리스트 처리 추가
+            if len(voxels) == 0:
+                print("경고 : 빈 voxels 리스트가 생성되었습니다.")
+                # 기본 빈 텐서 생성
+                device = points[0].device if len(points) > 0 else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+                empty_shape = (0, 4)
+                return {
+                    'voxels': torch.zeros(empty_shape, device=device),
+                    'coors': torch.zeros((0, 3), dtype=torch.int64, device=device),
+                    'num_points_per_voxel': torch.zeros(0, dtype=torch.int32, device=device)
+                }
+            
             if 'pts_semantic_mask' in data_samples[i].gt_pts_seg:
                 import torch_scatter
                 pts_semantic_mask = data_samples[
