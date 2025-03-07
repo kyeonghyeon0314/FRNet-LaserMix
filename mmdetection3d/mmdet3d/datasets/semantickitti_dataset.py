@@ -47,17 +47,17 @@ class SemanticKittiDataset(Seg3DDataset):
         'classes': ('car', 'bicycle', 'motorcycle', 'truck', 'bus', 'person',
                     'bicyclist', 'motorcyclist', 'road', 'parking', 'sidewalk',
                     'other-ground', 'building', 'fence', 'vegetation',
-                    'trunck', 'terrian', 'pole', 'traffic-sign'),
+                    'trunck', 'terrian', 'pole', 'traffic-sign', 'other-vehicle'),
         'palette': [[100, 150, 245], [100, 230, 245], [30, 60, 150],
                     [80, 30, 180], [100, 80, 250], [155, 30, 30],
                     [255, 40, 200], [150, 30, 90], [255, 0, 255],
                     [255, 150, 255], [75, 0, 75], [175, 0, 75], [255, 200, 0],
                     [255, 120, 50], [0, 175, 0], [135, 60, 0], [150, 240, 80],
-                    [255, 240, 150], [255, 0, 0]],
+                    [255, 240, 150], [255, 0, 0], [125, 0, 125]],
         'seg_valid_class_ids':
-        tuple(range(19)),
+        tuple(range(20)),
         'seg_all_class_ids':
-        tuple(range(19)),
+        tuple(range(20)),
     }
 
     def __init__(self,

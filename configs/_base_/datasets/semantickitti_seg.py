@@ -8,7 +8,7 @@ data_root = 'data/semantickitti/'
 
 # 수정의 필요가 있어 보이지만 일단 보류
 class_names = [
-    'car', 'road', 'sidewalk'
+    'car', 'road', 'sidewalk', 'other-vehicle'
 ]
 
 """
