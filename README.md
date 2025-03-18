@@ -53,4 +53,27 @@ python test.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py w
 ## 최종 결과
 - car를 제외한 나머지 vehicle을 other-vehicle로 묶고 향상된 학습법으로 학습했을시, **IoU**(67.45, 61.93) 점수가 **1.87%, 7.39%** 향상한것을 보였습니다.
 - 최종적으로 논문의 ***mIoU*** 점수(74.69, 84.75) 보다 약 **13%, 2.92%** 향상한 **87.67%** 의 결과를 보였습니다.
+<div align="center">
+  <div style="margin-bottom: 10px;">
+    <img src="/imgs/origin.png" width="50%">
+    <p style="text-align: center;">논문 결과</p>
+  </div>
+</div>
 
+- 제공된 Check points의 test 결과
+
+<div align="center">
+  <div style="margin-bottom: 10px;">
+    <img src="/imgs/checkpoints.png" width="50%">
+    <p style="text-align: center;">제공된 check points 결과</p>
+  </div>
+</div>
+
+- 학습완료한 Check points의 test 결과
+
+<div align="center">
+  <div style="margin-bottom: 10px;">
+    <img src="/imgs/test.png" width="50%">
+    <p style="text-align: center;">최종 학습된 check points 결과</p>
+  </div>
+</div>
