@@ -31,6 +31,8 @@ pip install -v -e .
 - FRNet의 최종 ```decode_head```로 ```FRhead```를 사용하는데 이는 ```['seg_logit']```으로 접근한다. 
 
 결론적으로, ```lasermix.py```의 line112, 113의 ```'logits'```를 ```'seg_logit'```으로 변환하면 된다.
+## mmdetection/mmdet/datasets/semantickitti-dataset.py METAINFO 수정
+labels_map에 보면 bus는 other-vehicle로 맵핑 되어있지만 METAINFO에는 bus가 존재 [semantickitti-api의 yaml](https://github.com/PRBonn/semantic-kitti-api/blob/master/config/semantic-kitti.yaml) 참고하여 번호 순서에 맞게 MEATAINFO 수정
 
 
 
