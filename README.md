@@ -49,7 +49,7 @@ python train.py configs/lasermix_frnet/lasermix_frnet_semantickitti_seg.py
 ## test
 
 ```
-python test.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py work_dirs/lasermix_frnet_semi_semantickitti_seg/best_miou_iter_18000.pth
+python test.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py work_dirs/lasermix_frnet_semi_semantickitti_seg/best_miou_iter_148000.pth
 ```
 
 ## 최종 결과
@@ -79,3 +79,24 @@ python test.py configs/lasermix_frnet/lasermix_frnet_semi_semantickitti_seg.py w
     <p style="text-align: center;">최종 학습된 check points 결과</p>
   </div>
 </div>
+
+
+# 추가 진행
+## 예측값 시각화
+<div align="center">
+  <div style="margin-bottom: 10px;">
+    <img src="/imgs/result.png" width="80%">
+    <p style="text-align: center;">예측값 시각화</p>
+  </div>
+</div>
+
+<div align="center">
+  <div style="margin-bottom: 10px;">
+    <img src="/imgs/result_panorama.png" width="80%">
+    <p style="text-align: center;">예측값 시각화</p>
+  </div>
+</div>
+
+## 라벨 데이터 remapping
+[semantickitti-api](https://github.com/PRBonn/semantic-kitti-api.git)의 **```./remap_semantic_labels.py```**을 이용하여 학습하고자하는 라벨로 다시 맵핑하여 추가 학습 진행
+

@@ -209,6 +209,32 @@ test_pipeline = [
         ignore_index=4),
     dict(type='Pack3DDetInputs', keys=['points'], meta_keys=['num_points'])
 ]
+test_pipeline_2 = [
+    dict(
+        type='LoadPointsFromFile',
+        coord_type='LIDAR',
+        load_dim=4,
+        use_dim=4,
+        backend_args=backend_args),
+    dict(
+        type='LoadAnnotations3D',
+        with_bbox_3d=False,
+        with_label_3d=False,
+        with_seg_3d=False,
+        seg_3d_dtype='np.int32',
+        seg_offset=2**16,
+        dataset_type='semantickitti',
+        backend_args=backend_args),
+    dict(type='PointSegClassMapping'),
+    dict(
+        type='RangeInterpolation',
+        H=64,
+        W=2048,
+        fov_up=3.0,
+        fov_down=-25.0,
+        ignore_index=4),
+    dict(type='Pack3DDetInputs', keys=['points'], meta_keys=['num_points'])
+]
 tta_pipeline = [
     dict(
         type='LoadPointsFromFile',
@@ -317,7 +343,22 @@ val_dataloader = dict(
         test_mode=True,
         backend_args=backend_args))
 
-test_dataloader = val_dataloader
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=1,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='semantickitti_infos_test.pkl',
+        pipeline=test_pipeline_2,
+        metainfo=metainfo,
+        modality=input_modality,
+        ignore_index=4,
+        test_mode=True,
+        backend_args=backend_args))
 
 val_evaluator = dict(type='SegMetric')
 test_evaluator = val_evaluator
@@ -327,8 +368,5 @@ visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 tta_model = dict(type='Seg3DTTAModel')
-
-
-
 
 
