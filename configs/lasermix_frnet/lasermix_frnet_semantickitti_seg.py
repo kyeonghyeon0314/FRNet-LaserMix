@@ -136,6 +136,7 @@ segmentor_student = dict(
 
 segmentor_teacher = dict(
     type='FRNet',
+    init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
     data_preprocessor=dict(type='FrustumRangePreprocessor',
                            H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=4),
     voxel_encoder=dict(
@@ -241,8 +242,7 @@ segmentor_teacher = dict(
             conv_seg_kernel_size=1,
             ignore_index=4,
             indices=4),
-    ],
-    init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
+    ]
     )
 model = dict(
     type='LaserMix', 
