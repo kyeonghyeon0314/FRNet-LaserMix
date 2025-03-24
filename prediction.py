@@ -38,7 +38,7 @@ class SemantickInferMertric(BaseMetric):
         self.result_path = result_path
         self.result_start_index = result_start_index
         self.current_start_index = self.result_start_index
-        self.limit=[4541,1101,4661,801,271,2761,1101,1101,4071,1591,1201,921,1061,3281,631,1901,1731,491,1801,4981,831,2721]#the length of every test set seq
+        self.limit=[4541,1101,4661,801,271,2761,1101,1101,4071] #,1591,1201,921,1061,3281,631,1901,1731,491,1801,4981,831,2721]#the length of every test set seq
         self.limit_id = 0 #count 
         self.scene_id = 8 #seq id
         super(SemantickInferMertric, self).__init__(
@@ -70,18 +70,59 @@ class SemantickInferMertric(BaseMetric):
         # 데이터 배치 구조 확인
         print(f"입력 데이터 키: {data_batch.keys()}")
 
+        original_points = None
+        # 원본 포인트 클라우드 데이터 가져오기
+
+        if 'points' in data_batch:
+            original_points = data_batch['points']
+        elif 'inputs' in data_batch and hasattr(data_batch['inputs'], 'points'):
+            original_points = data_batch['inputs'].points
+
         # 입력 데이터 정보 안전하게 출력 
         if 'inputs' in data_batch:
             if isinstance(data_batch['inputs'], dict):
                 print(f"입력 데이터 타입: 딕셔너리")
                 print(f"입력 데이터 키: {data_batch['inputs'].keys()}")
-                print(f"입력 데이터 크기: {data_batch['inputs'].shape}")
+                print(f"입력 데이터 항목 수: {len(data_batch['inputs'])}")
+            else:
+                print(f"입력 데이터 타입: {type(data_batch['inputs'])}")
+                if hasattr(data_batch['inputs'], 'shape'):
+                    print(f"입력 데이터 크기: {data_batch['inputs'].shape}")
 
-        # label inv
-        # pdb.set_trace()
-        # pdb.set_trace()
+        
         pred = data_samples[0]['pred_pts_seg']['pts_semantic_mask'] #labels
         print(f"원본 예측값: {pred.unique()}, 크기: {pred.shape}")
+
+
+        # 원본 포인트 수 확인
+        original_points_count = 0
+        if original_points is not None:
+            if isinstance(original_points, torch.Tensor):
+                original_points_count = original_points.shape[0]
+            elif hasattr(original_points, 'shape'):
+                original_points_count = original_points.shape[0]
+    
+        # 원본 포인트 수 가져오는 대체 방법 (데이터셋에서 직접 로드)
+        if original_points_count == 0:
+            try:
+                # 현재 시퀀스와 프레임에 해당하는 원본 .bin 파일 경로
+                bin_path = f'data/semantickitti/sequences/0{self.scene_id}/velodyne/{self.limit_id:06}.bin'
+                if os.path.exists(bin_path):
+                    # .bin 파일에서 원본 포인트 수 가져오기
+                    original_scan = np.fromfile(bin_path, dtype=np.float32).reshape(-1, 4)
+                    original_points_count = original_scan.shape[0]
+                    print(f"원본 스캔 포인트 수: {original_points_count}")
+                else:
+                    print(f"경고: 원본 스캔 파일을 찾을 수 없습니다: {bin_path}")
+            except Exception as e:
+                print(f"원본 스캔 로드 중 오류 발생: {str(e)}")
+    
+        # 예측 결과와 원본 포인트 수 비교
+        pred_count = pred.shape[0]
+        print(f"예측 포인트 수: {pred_count}, 원본 포인트 수: {original_points_count}")
+
+
+
         map_inv = {
                 0: 10,  # car
                 1: 40,  # road
@@ -96,13 +137,29 @@ class SemantickInferMertric(BaseMetric):
         for model_class, kitti_class in map_inv.items():
             mapped_pred[pred == model_class] = kitti_class
         
-        print(f"매핑 후 예측값: {mapped_pred.unique()}, 크기: {mapped_pred.shape}")
+        # 포인트 수 조정 (예측 포인트 수와 원본 포인트 수가 다른 경우)
+        final_pred = mapped_pred
+        if original_points_count > 0 and pred_count != original_points_count:
+            print(f"포인트 수 불일치 감지: 예측={pred_count}, 원본={original_points_count}")
+        
+            if pred_count < original_points_count:
+                # 예측 포인트 수가 적은 경우 - 빈 공간을 unlabeled(0)로 채움
+                final_pred = torch.zeros(original_points_count, dtype=mapped_pred.dtype, device=mapped_pred.device)
+                final_pred[:pred_count] = mapped_pred
+                print(f"포인트 수 조정: 부족한 {original_points_count - pred_count}개 포인트를 unlabeled(0)로 채움")
+            
+            elif pred_count > original_points_count:
+                # 예측 포인트 수가 많은 경우 - 원본 포인트 수에 맞게 자름
+                final_pred = mapped_pred[:original_points_count]
+                print(f"포인트 수 조정: 초과 {pred_count - original_points_count}개 포인트를 제거")
+            
+        print(f"최종 예측값: {final_pred.unique()}, 크기: {final_pred.shape}")
         
         # 결과 저장
         work_dir = f'{self.result_path}/sequences/{self.scene_id}/predictions'
         os.makedirs(work_dir, exist_ok=True)
         
-        mapped_pred.cpu().numpy().astype(np.int32).tofile(f'{work_dir}/{self.limit_id:06}.label')
+        final_pred.cpu().numpy().astype(np.int32).tofile(f'{work_dir}/{self.limit_id:06}.label')
         print(f'저장완료 : {self.scene_id}/predictions/{self.limit_id:06}.label')
         print(f"====== 프레임 처리 완료 ======\n")
 
