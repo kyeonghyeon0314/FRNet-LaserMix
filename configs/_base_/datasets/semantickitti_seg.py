@@ -12,58 +12,33 @@ class_names = [
 ]
 
 """
-19 : unlabeled
+19 : unlabeled  --> 4
 0 : car
-8 : road
-10 : sidewalk
-4 : other-vehicle
+8 : road  --> 1
+10 : sidewalk --> 2
+4 : other-vehicle --> 3
 
 labels_map 위 클래스로 수정완료
 
-"""
-labels_map = {
-    0: 4,    # "unlabeled"
-    1: 4,    # "outlier" mapped to "unlabeled"           --------------mapped
-    10: 0,   # "car"
-    11: 3,   # "bicycle"  mapped to "other-vehicle"      --------------mapped
-    13: 3,   # "bus" mapped to "other-vehicle"           --------------mapped
-    15: 3,   # "motorcycle" mapped to "other-vehicle"    --------------mapped
-    16: 4,   # "on-rails" mapped to "unlabeled"         --------------mapped
-    18: 3,   # "truck" mapped to "other-vehicle"         --------------mapped
-    20: 3,   # "other-vehicle"
-    30: 4,   # "person" mapped to "unlabeled"            --------------mapped
-    31: 3,   # "bicyclist" mapped to "ohter-vehicle"     --------------mapped
-    32: 3,   # "motorcyclist" mapped to "other-vehicle"  --------------mapped
-    40: 1,   # "road"
-    44: 4,   # "parking" mapped to "unlabeled"           --------------mapped
-    48: 2,  # "sidewalk"
-    49: 4,  # "other-ground" mapped to "unlabeled"      --------------mapped
-    50: 4,  # "building" mapped to "unlabeled"          --------------mapped
-    51: 4,  # "fence" mapped to "unlabeled"             --------------mapped
-    52: 4,  # "other-structure" mapped to "unlabeled"   --------------mapped
-    60: 1,   # "lane-marking" to "road"                  --------------mapped
-    70: 4,  # "vegetation" mapped to  "unlabeled"       --------------mapped
-    71: 3,   # "trunk" mapped to "other-vehicle"         --------------mapped
-    72: 4,  # "terrain" mapped to "unlabeled"           --------------mapped
-    80: 4,  # "pole" mapped to "unlabeled"              --------------mapped 
-    81: 4,  # "traffic-sign" mapped to "unlabeled"      --------------mapped
-    99: 4,  # "other-object" to "unlabeled"           ----------------mapped
-    252: 0,  # "moving-car" to "car"           ------------------------mapped
-    253: 3,  # "moving-bicyclist" to "other-vehicle"       ------------mapped
-    254: 4, # "moving-person" to "unlabeled"        ------------------mapped
-    255: 3,  # "moving-motorcyclist" to "other-vehicle" ---------------mapped
-    256: 3,  # "moving-on-rails" mapped to "other-vehicle" ------------mapped
-    257: 3,  # "moving-bus" mapped to "other-vehicle"           -------mapped
-    258: 3,  # "moving-truck" to "other-vehicle"   --------------------mapped
-    259: 3   # "moving-other"-vehicle to "other-vehicle"          -----mapped
+""" 
+# 라벨 데이터 remap
+
+labels_map ={
+    0 : 4,   # unlabeled
+    10 : 0,  # car
+    40 : 1,  # road
+    48 : 2,  # sidewalk
+    20 : 3,  # other-vehicle
+
 }
+
 """
 현재 반지도학습을 위해 lasermix 정보를 가지고 왔음 cylinder3d를 frnet으로 변경 적용
 Teacher-student Network 기반의 완전 지도 학습 , 선행학습된 Teacher model을 통한 지도 학습 적용
 """
 
 metainfo = dict(
-    classes=class_names, seg_label_mapping=labels_map, max_label=259
+    classes=class_names, seg_label_mapping=labels_map, max_label=259  # max_label= 259
 )
 
 input_modality = dict(use_lidar=True, use_camera=False)
@@ -173,7 +148,7 @@ unsup_pipeline = [
         flip_ratio_bev_vertical=0.5),
     dict(
         type='GlobalRotScaleTrans',
-        rot_range=[-0.78539816, 0.78539816],
+        rot_range=[-3.1415926, 3.1415926],  # teacher-network 에서는 회전범위 축소
         scale_ratio_range=[0.95, 1.05],
         translation_std=[0.1, 0.1, 0.1]),
     dict(
@@ -209,6 +184,8 @@ test_pipeline = [
         ignore_index=4),
     dict(type='Pack3DDetInputs', keys=['points'], meta_keys=['num_points'])
 ]
+
+# for prediction.py
 test_pipeline_2 = [
     dict(
         type='LoadPointsFromFile',
@@ -216,16 +193,6 @@ test_pipeline_2 = [
         load_dim=4,
         use_dim=4,
         backend_args=backend_args),
-    dict(
-        type='LoadAnnotations3D',
-        with_bbox_3d=False,
-        with_label_3d=False,
-        with_seg_3d=False,
-        seg_3d_dtype='np.int32',
-        seg_offset=2**16,
-        dataset_type='semantickitti',
-        backend_args=backend_args),
-    dict(type='PointSegClassMapping'),
     dict(
         type='RangeInterpolation',
         H=64,
@@ -235,6 +202,7 @@ test_pipeline_2 = [
         ignore_index=4),
     dict(type='Pack3DDetInputs', keys=['points'], meta_keys=['num_points'])
 ]
+
 tta_pipeline = [
     dict(
         type='LoadPointsFromFile',
@@ -317,11 +285,11 @@ labeled_dataset_teacher = dict(
 )
 
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=2,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(
-        type='mmdet.MultiSourceSampler', batch_size=4, source_ratio=[1, 1]),
+        type='mmdet.MultiSourceSampler', batch_size=2, source_ratio=[1, 1]),
     dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, labeled_dataset_teacher])    # labeled data만 적용 할지 선택
     #dataset=labeled_dataset # labeled_dataset
 )
@@ -343,6 +311,7 @@ val_dataloader = dict(
         test_mode=True,
         backend_args=backend_args))
 
+# for prediction.py
 test_dataloader = dict(
     batch_size=1,
     num_workers=1,
@@ -352,7 +321,7 @@ test_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='semantickitti_infos_test.pkl',
+        ann_file='semantickitti_infos_trainval.pkl',
         pipeline=test_pipeline_2,
         metainfo=metainfo,
         modality=input_modality,
@@ -361,12 +330,14 @@ test_dataloader = dict(
         backend_args=backend_args))
 
 val_evaluator = dict(type='SegMetric')
-test_evaluator = val_evaluator
+#test_evaluator = val_evaluator
 
 vis_backends = [dict(type='LocalVisBackend')]
 visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
 tta_model = dict(type='Seg3DTTAModel')
+
+
 
 

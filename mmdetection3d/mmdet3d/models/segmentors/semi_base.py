@@ -139,6 +139,16 @@ class SemiBase3DSegmentor(Base3DSegmentor):
             pseudo_thr = self.semi_train_cfg.get('pseudo_thr', 0.)
             ignore_mask = (seg_scores < pseudo_thr)
             seg_labels[ignore_mask] = self.semi_train_cfg.ignore_label
+
+            """
+            # labels_inv 맵핑 적용
+            if hasattr(self.semi_train_cfg, 'labels_inv'):
+                mapped_labels = torch.ones_like(seg_labels) * self.semi_train_cfg.ignore_label
+                for src_label , tgt_label in self.semi_train_cfg.labels_inv.items():
+                    mapped_labels[seg_labels == src_label] = tgt_label
+                seg_labels = mapped_labels
+            """
+
             data_samples.set_data(
                 {'gt_pts_seg': PointData(**{'pts_semantic_mask': seg_labels})})
         return logits, batch_data_samples
@@ -157,6 +167,17 @@ class SemiBase3DSegmentor(Base3DSegmentor):
             pseudo_thr = self.semi_train_cfg.get('pseudo_thr', 0.)
             ignore_mask = (seg_score < pseudo_thr)
             seg_label[ignore_mask] = self.semi_train_cfg.ignore_label
+
+            
+            """
+            # labels_inv 맵핑 적용
+            if hasattr(self.semi_train_cfg, 'labels_inv'):
+                mapped_labels = torch.ones_like(seg_labels) * self.semi_train_cfg.ignore_label
+                for src_label , tgt_label in self.semi_train_cfg.labels_inv.items():
+                    mapped_labels[seg_labels == src_label] = tgt_label
+                seg_labels = mapped_labels
+            """
+
             data_samples.set_data(
                 {'gt_pts_seg': PointData(**{'semantic_seg': torch.unsqueeze(seg_label, dim=0)})})
         return logits, batch_data_samples

@@ -136,7 +136,7 @@ segmentor_student = dict(
 
 segmentor_teacher = dict(
     type='FRNet',
-    init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
+    #init_cfg=dict(type='Pretrained', checkpoint='work_dirs/frnet-semantickitti_seg.pth'),
     data_preprocessor=dict(type='FrustumRangePreprocessor',
                            H=64, W=512, fov_up=3.0,fov_down=-25.0, ignore_index=4),
     voxel_encoder=dict(
@@ -258,10 +258,37 @@ model = dict(
     semi_train_cfg=dict(
         freeze_teacher=True, pseudo_thr=0.9, ignore_label=4,
         pitch_angles=[-25, 3], num_areas=[4, 5, 6, 7, 8],
-        sup_weight=1, unsup_weight=1,
-    ),
+        sup_weight=1, unsup_weight=1,  ),
+
+
+
     semi_test_cfg=dict(extract_feat_on='teacher', predict_on='teacher'))
 
 
 # EMA 가중치 업데이트 방식, mmdet에 추가가 되어 있지 않음 lasermix.py에 직접적으로 구현되어 있는것으로 확인되지만 mmdetection3d에 적혀있는것을 그대로 적어놓은듯 하다.
 custom_hooks = [dict(type='mmdet.MeanTeacherHook', momentum=0.01)]  
+
+
+
+
+#        labels_inv = {
+#                        0 : 0,       # 차는 차
+#                        1 : 3,       # 자전거는 other-vehicle
+#                        2 : 3,       #
+#                        3 : 3,       
+#                        4 : 3,       # other-vehicle to other vehicle
+#                        7 : 3,
+#                        8 : 1  ,     # road to road
+#                        9 : 4,
+#                        10 : 2 ,     # sidewalk to sidewalk
+#                        11 : 4,
+#                        12 : 4,
+#                        13 : 4,
+#                        14 : 4,
+#                        15 : 4,
+#                        16 : 4,
+#                        17 : 4,
+#                        18 : 4,
+#                        19 : 4,
+#                    }
+
